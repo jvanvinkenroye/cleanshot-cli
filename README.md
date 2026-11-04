@@ -11,9 +11,9 @@ ob die Aktion geklappt hat. Die Ausgabe sagt deshalb nur „übergeben“.
 ## Installation
 
 ```bash
-uv tool install .          # stellt den Befehl `cleanshot` bereit
+uv tool install .          # stellt den Befehl `cleanshot-cli` bereit
 # oder im Projekt:
-uv sync && uv run cleanshot --help
+uv sync && uv run cleanshot-cli --help
 ```
 
 ## Befehle
@@ -50,10 +50,10 @@ Globale Optionen (vor dem Befehl): `-v/--verbose` gibt die URL aus,
 nichts auf, `--version`.
 
 ```bash
-cleanshot capture-fullscreen -a copy
-cleanshot capture-area --x 0 --y 0 --width 800 --height 600 -a upload
-cleanshot -n capture-text -f "$HOME/Desktop/Bild mit Leerzeichen.png"
-cleanshot settings -t shortcuts
+cleanshot-cli capture-fullscreen -a copy
+cleanshot-cli capture-area --x 0 --y 0 --width 800 --height 600 -a upload
+cleanshot-cli -n capture-text -f "$HOME/Desktop/Bild mit Leerzeichen.png"
+cleanshot-cli settings -t shortcuts
 ```
 
 ## Unterschiede zur Go-Vorlage

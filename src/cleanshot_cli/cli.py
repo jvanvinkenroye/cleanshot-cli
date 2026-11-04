@@ -13,7 +13,7 @@ from cleanshot_cli import __version__
 from cleanshot_cli.urlscheme import CleanShotError, ParamValue, build_url, open_url
 
 app = typer.Typer(
-    name="cleanshot",
+    name="cleanshot-cli",
     help=(
         "Steuert CleanShot X vom Terminal aus. CleanShot X muss installiert sein; "
         "jeder Befehl wird als cleanshot://-URL an die App uebergeben."
@@ -67,7 +67,7 @@ FileOpt = Annotated[
 
 def _version_callback(value: bool) -> None:
     if value:
-        typer.echo(f"cleanshot {__version__}")
+        typer.echo(f"cleanshot-cli {__version__}")
         raise typer.Exit
 
 
