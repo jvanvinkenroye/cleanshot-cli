@@ -1,0 +1,42 @@
+[project]
+name = "cleanshot-cli"
+version = "0.1.0"
+description = "Kommandozeile fuer CleanShot X auf macOS (ueber das URL-Schema cleanshot://)"
+readme = "README.md"
+authors = [
+    { name = "Jan Vanvinkenroye", email = "jan@vanvinkenroye.de" }
+]
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.27.3",
+]
+
+[project.scripts]
+cleanshot = "cleanshot_cli.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.3",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "PTH"]
+
+[tool.mypy]
+strict = true
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
