@@ -56,6 +56,52 @@ cleanshot-cli -n capture-text -f "$HOME/Desktop/Bild mit Leerzeichen.png"
 cleanshot-cli settings -t shortcuts
 ```
 
+## MCP-Server
+
+`cleanshot-cli mcp` startet einen MCP-Server über stdio. Dafür braucht es das
+optionale Extra `mcp`:
+
+```bash
+uv tool install '.[mcp]'
+claude mcp add cleanshot -- cleanshot-cli mcp
+```
+
+Ohne Installation, direkt aus dem Projekt:
+
+```bash
+claude mcp add cleanshot -- uv --directory ~/src_own/cleanshot-cli run --extra mcp cleanshot-cli mcp
+```
+
+Für Claude Desktop (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "cleanshot": { "command": "cleanshot-cli", "args": ["mcp"] }
+  }
+}
+```
+
+| Werkzeug | Zweck |
+| --- | --- |
+| `capture` | Aufnahme starten (`mode`: area, fullscreen, window, previous_area, self_timer, scrolling) |
+| `capture_image` | Aufnehmen, speichern und das Bild an den Client zurückgeben |
+| `latest_capture` | Neueste Aufnahme aus dem Speicherordner zurückgeben |
+| `record_screen` | Bildschirmvideo starten |
+| `capture_text` | OCR, Ergebnis landet in der Zwischenablage |
+| `annotate`, `pin` | Editor öffnen bzw. Bild anheften, optional mit Datei |
+| `open_settings` | Einstellungen öffnen |
+| `run_simple` | Befehle ohne Parameter (history, restore, Schreibtischsymbole, …) |
+
+Nur `capture_image` und `latest_capture` liefern ein Bild. Alle anderen Werkzeuge
+melden nur, dass der Befehl übergeben wurde. Bei `area`, `window` und `scrolling`
+muss ein Mensch am Bildschirm auswählen.
+
+Den Speicherordner liest der Server aus den CleanShot-Einstellungen
+(`defaults read pl.maketheweb.cleanshotx exportPath`). Mit `CLEANSHOT_EXPORT_DIR`
+lässt er sich überschreiben, Rückfall ist `~/Desktop`. Bilder mit einer Kante über
+1568 px werden vor der Rückgabe per `sips` verkleinert.
+
 ## Unterschiede zur Go-Vorlage
 
 - `x=0` / `y=0` gehen nicht mehr verloren.
@@ -69,7 +115,7 @@ cleanshot-cli settings -t shortcuts
 ## Entwicklung
 
 ```bash
-uv sync
+uv sync --extra mcp
 uv run pytest
 uv run ruff check . && uv run ruff format --check .
 uv run mypy

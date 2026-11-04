@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+import importlib.util
 from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
 
 import typer
 
 from cleanshot_cli import __version__
+from cleanshot_cli.commands import SIMPLE_COMMANDS, Action, region
 from cleanshot_cli.urlscheme import CleanShotError, ParamValue, build_url, open_url
 
 app = typer.Typer(
@@ -21,16 +22,6 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
-
-
-class Action(StrEnum):
-    """Was CleanShot nach der Aufnahme mit dem Bild tut."""
-
-    COPY = "copy"
-    SAVE = "save"
-    ANNOTATE = "annotate"
-    UPLOAD = "upload"
-    PIN = "pin"
 
 
 @dataclass(frozen=True)
@@ -123,14 +114,10 @@ def _send(ctx: typer.Context, command: str, params: dict[str, ParamValue]) -> No
 def _region(
     x: int | None, y: int | None, width: int | None, height: int | None
 ) -> dict[str, ParamValue]:
-    values = {"x": x, "y": y, "width": width, "height": height}
-    given = [k for k, v in values.items() if v is not None]
-    # Ein halber Bereich ergibt fuer CleanShot keinen Sinn und wuerde still
-    # ignoriert; lieber frueh und deutlich abbrechen.
-    if given and len(given) != len(values):
-        missing = ", ".join(f"--{k}" for k in values if k not in given)
-        raise typer.BadParameter(f"Bereich unvollstaendig, es fehlt: {missing}")
-    return dict(values)
+    try:
+        return region(x, y, width, height)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
 
 
 def _action(action: Action | None) -> str | None:
@@ -238,27 +225,6 @@ def settings(
     _send(ctx, "open-settings", {"tab": tab})
 
 
-# Befehle ohne Optionen: Name auf der Kommandozeile -> URL-Befehl, Hilfetext.
-SIMPLE_COMMANDS: tuple[tuple[str, str, str], ...] = (
-    (
-        "annotate-clipboard",
-        "open-from-clipboard",
-        "Bild aus der Zwischenablage annotieren.",
-    ),
-    ("all-in-one", "all-in-one", "All-in-One-Modus starten."),
-    ("history", "open-history", "Verlauf oeffnen."),
-    (
-        "restore",
-        "restore-recently-closed",
-        "Zuletzt geschlossene Aufnahme zurueckholen.",
-    ),
-    ("toggle-desktop-icons", "toggle-desktop-icons", "Schreibtischsymbole umschalten."),
-    ("hide-desktop-icons", "hide-desktop-icons", "Schreibtischsymbole ausblenden."),
-    ("show-desktop-icons", "show-desktop-icons", "Schreibtischsymbole einblenden."),
-    ("quick-access", "add-quick-access-overlay", "Quick-Access-Overlay hinzufuegen."),
-)
-
-
 def _register_simple(name: str, url_command: str, help_text: str) -> None:
     def command(ctx: typer.Context) -> None:
         _send(ctx, url_command, {})
@@ -268,6 +234,23 @@ def _register_simple(name: str, url_command: str, help_text: str) -> None:
 
 for _name, _url_command, _help in SIMPLE_COMMANDS:
     _register_simple(_name, _url_command, _help)
+
+
+@app.command("mcp")
+def mcp() -> None:
+    """MCP-Server ueber stdio starten (braucht das Extra 'mcp')."""
+    # Vorab pruefen statt ImportError fangen: ein Importfehler *im* Server soll
+    # nicht als "Extra fehlt" missverstanden werden.
+    if importlib.util.find_spec("mcp") is None:
+        typer.echo(
+            "Fehler: Das MCP-SDK fehlt. Installiere mit "
+            "\"uv tool install '.[mcp]'\" bzw. 'uv sync --extra mcp'.",
+            err=True,
+        )
+        raise typer.Exit(1)
+    from cleanshot_cli.mcp_server import server
+
+    server.run()
 
 
 def main() -> None:

@@ -6,7 +6,8 @@ import pytest
 from typer.testing import CliRunner
 
 from cleanshot_cli import __version__
-from cleanshot_cli.cli import SIMPLE_COMMANDS, app
+from cleanshot_cli.cli import app
+from cleanshot_cli.commands import SIMPLE_COMMANDS
 from tests.conftest import FakeRun
 
 runner = CliRunner()
@@ -95,7 +96,7 @@ def test_missing_file_is_rejected(fake_run: FakeRun) -> None:
 def test_incomplete_region_is_rejected(fake_run: FakeRun) -> None:
     result = runner.invoke(app, ["capture-area", "--x", "5"])
     assert result.exit_code == 2
-    assert "--width" in result.output
+    assert "width" in result.output
     assert fake_run.calls == []
 
 
