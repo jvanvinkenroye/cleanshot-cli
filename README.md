@@ -123,3 +123,8 @@ uv run mypy
 
 Die Tests ersetzen `subprocess.run` per autouse-Fixture und rufen CleanShot nie
 wirklich auf.
+
+## Lizenz
+
+MIT, siehe [LICENSE](LICENSE). CleanShot X ist ein kommerzielles Produkt von
+MakeTheWeb; dieses Projekt steht in keiner Verbindung dazu.

@@ -7,6 +7,7 @@ authors = [
     { name = "Jan Vanvinkenroye", email = "jan@vanvinkenroye.de" }
 ]
 license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "typer>=0.27.3",
